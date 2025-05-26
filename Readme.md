@@ -167,18 +167,6 @@ Log in and receive JWT token.
 
 ### Properties
 
-#### `POST /api/properties/import`
-
-Import properties from CSV.
-
-**URL**: `https://cdn2.gro.care/db424fd9fb74_1748258398689.csv`
-
-**Response**:
-`200`: `{ "message": "Data imported successfully" }`
-`500`: `{ "error": "Error importing data" }`
-
----
-
 #### `POST /api/properties`
 
 Create new property listing (Auth required).
