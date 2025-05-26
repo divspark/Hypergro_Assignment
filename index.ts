@@ -24,19 +24,13 @@ app.get('/api', (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-// app.listen(PORT, async () => {
-//     await connectDB();
-//     await connectRedis();
-//     console.log(`Server running on port ${PORT}`);
-// });
-
 
 const startServer = async () => {
   await connectDB();
   await connectRedis();
 
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
   });
 };
 
