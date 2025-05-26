@@ -1,21 +1,6 @@
 import { Request, Response } from 'express';
-// import csv from 'csvtojson';
 import Property from '../models/Property';
 import { redisClient } from '../config/db';
-
-// export const importCSV = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const csvData = await csv().fromFile('https://cdn2.gro.care/db424fd9fb74_1748258398689.csv');
-//         await Property.insertMany(csvData.map((item: any) => ({
-//             ...item,
-//             createdBy: 'system',
-//             createdAt: new Date()
-//         })));
-//         res.json({ message: 'Data imported successfully' });
-//     } catch (error) {
-//         res.status(500).json({ error: 'Error importing data' });
-//     }
-// };
 
 export const createProperty = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -40,6 +25,7 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
         await redisClient.setEx('properties', 3600, JSON.stringify(properties));
         res.json(properties);
     } catch (error) {
+        console.error("Error fetching properties:", error);
         res.status(500).json({ error: 'Error fetching properties' });
     }
 };
