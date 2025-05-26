@@ -1,5 +1,3 @@
-
-```markdown
 # Property Listing System Backend
 
 ## Overview
