@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "dist",           // where compiled JS will go
+    "rootDir": ".",             // root is the current folder
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["*.ts", "types/**/*.ts", "index.js"]  // pick up index.ts, other root files and types
+}
