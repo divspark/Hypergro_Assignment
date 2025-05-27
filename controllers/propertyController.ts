@@ -15,20 +15,39 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
 
 export const getProperties = async (req: Request, res: Response): Promise<void> => {
     try {
-        const cachedProperties = await redisClient.get('properties');
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 50;
+        const skip = (page - 1) * limit;
+
+        const cacheKey = `properties:page:${page}:limit:${limit}`;
+        const cachedProperties = await redisClient.get(cacheKey);
+
         if (cachedProperties) {
-            res.json(JSON.parse(cachedProperties));
+            const parsed = JSON.parse(cachedProperties);
+            res.json(parsed);
             return;
         }
 
-        const properties = await Property.find();
-        await redisClient.setEx('properties', 3600, JSON.stringify(properties));
-        res.json(properties);
+        const [properties, totalCount] = await Promise.all([
+            Property.find().skip(skip).limit(limit),
+            Property.countDocuments()
+        ]);
+
+        const hasMore = page * limit < totalCount;
+
+        const response = {
+            properties,
+            hasMore
+        };
+
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(response));
+        res.json(response);
     } catch (error) {
         console.error("Error fetching properties:", error);
         res.status(500).json({ error: 'Error fetching properties' });
     }
 };
+
 
 export const getProperty = async (req: Request, res: Response): Promise<void> => {
     try {
