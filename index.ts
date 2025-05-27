@@ -18,7 +18,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 
-app.get('/api', (req, res) => {
+app.get('/', (req, res) => {
     res.send('Property Listing API on Vercel');
 });
 
