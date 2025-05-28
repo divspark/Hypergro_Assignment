@@ -9,9 +9,16 @@ export const addFavorite = async (req: Request, res: Response) => {
         await favorite.save();
         
         await redisClient.del(`favorites:${req.userId}`);
-        res.status(201).json(favorite);
+        res.status(201).json({
+            success: true,
+            message: 'Property added to favorites successfully',
+            data: favorite
+        });
     } catch (error) {
-        res.status(400).json({ error: 'Error adding to favorites' });
+        res.status(400).json({
+            success: false,
+            message: 'Error adding to favorites'
+        });
     }
 };
 
@@ -20,15 +27,26 @@ export const getFavorites = async (req: Request, res: Response): Promise<void> =
         const cacheKey = `favorites:${req.userId}`;
         const cachedFavorites = await redisClient.get(cacheKey);
         if (cachedFavorites) {
-            res.json(JSON.parse(cachedFavorites));
+            res.json({
+                success: true,
+                message: 'Favorites fetched successfully from cache',
+                data: JSON.parse(cachedFavorites)
+            });
             return;
         }
 
         const favorites = await Favourite.find({ userId: req.userId }).populate('propertyId');
         await redisClient.setEx(cacheKey, 3600, JSON.stringify(favorites));
-        res.json(favorites);
+        res.json({
+            success: true,
+            message: 'Favorites fetched successfully',
+            data: favorites
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Error fetching favorites' });
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching favorites'
+        });
     }
 };
 
@@ -36,8 +54,14 @@ export const removeFavorite = async (req: Request, res: Response) => {
     try {
         await Favourite.deleteOne({ userId: req.userId, propertyId: req.params.propertyId });
         await redisClient.del(`favorites:${req.userId}`);
-        res.json({ message: 'Removed from favorites' });
+        res.json({
+            success: true,
+            message: 'Property removed from favorites successfully'
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Error removing from favorites' });
+        res.status(500).json({
+            success: false,
+            message: 'Error removing from favorites'
+        });
     }
 };

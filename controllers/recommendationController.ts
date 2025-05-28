@@ -8,7 +8,10 @@ export const recommendProperty = async (req: Request, res: Response): Promise<vo
         const { propertyId, recipientEmail } = req.body;
         const recipient = await User.findOne({ email: recipientEmail });
         if (!recipient) {
-            res.status(404).json({ error: 'Recipient not found' });
+            res.status(404).json({
+                success: false,
+                message: 'Recipient not found'
+            });
             return;  // stop further execution
         }
 
@@ -20,9 +23,16 @@ export const recommendProperty = async (req: Request, res: Response): Promise<vo
         await recommendation.save();
 
         await redisClient.del(`recommendations:${recipient._id}`);
-        res.status(201).json(recommendation);
+        res.status(201).json({
+            success: true,
+            message: 'Recommendation created successfully',
+            data: recommendation
+        });
     } catch (error) {
-        res.status(400).json({ error: 'Error creating recommendation' });
+        res.status(400).json({
+            success: false,
+            message: 'Error creating recommendation'
+        });
     }
 };
 
@@ -31,7 +41,11 @@ export const getRecommendations = async (req: Request, res: Response): Promise<v
         const cacheKey = `recommendations:${req.userId}`;
         const cachedRecommendations = await redisClient.get(cacheKey);
         if (cachedRecommendations) {
-            res.json(JSON.parse(cachedRecommendations));
+            res.json({
+                success: true,
+                message: 'Recommendations fetched successfully from cache',
+                data: JSON.parse(cachedRecommendations)
+            });
             return;
         }
 
@@ -40,9 +54,16 @@ export const getRecommendations = async (req: Request, res: Response): Promise<v
             .populate('fromUserId', 'name email');
 
         await redisClient.setEx(cacheKey, 3600, JSON.stringify(recommendations));
-        res.json(recommendations);
+        res.json({
+            success: true,
+            message: 'Recommendations fetched successfully',
+            data: recommendations
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Error fetching recommendations' });
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching recommendations'
+        });
     }
 };
 
