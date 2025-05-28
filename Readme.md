@@ -1,15 +1,6 @@
 # Property Listing System Backend
 
-## Overview
-
-The Property Listing System Backend is a Node.js-based RESTful API built with Express, MongoDB, and Redis Cloud. It powers a real estate platform, allowing users to register, manage property listings, save favorites, and share recommendations.
-
-The backend uses:
-- **MongoDB** for persistent storage
-- **Redis Cloud** for caching to enhance performance
-- **JWT** for secure authentication
-
-Deployed on **Vercel** as a serverless application, it supports scalable, high-performance operations.
+The **Property Listing System Backend** is a Node.js-based RESTful API built with **Express**, **MongoDB**, and **Redis Cloud**. It powers a real estate platform that allows users to register, manage property listings, save favorites, and share recommendations.
 
 ---
 
@@ -25,7 +16,7 @@ Deployed on **Vercel** as a serverless application, it supports scalable, high-p
 
 ---
 
-## Tech Stack
+## 🛠 Tech Stack
 
 - **Node.js**: Runtime environment
 - **Express**: Web framework
@@ -36,14 +27,17 @@ Deployed on **Vercel** as a serverless application, it supports scalable, high-p
 - **JWT**: Authentication
 - **Vercel**: Serverless deployment
 
-**Dependencies**: `express`, `mongoose`, `redis`, `jsonwebtoken`, `bcryptjs`, `csvtojson`, `dotenv`
+### Dependencies
+
+```bash
+express, mongoose, redis, jsonwebtoken, bcryptjs, csvtojson, dotenv, zod
+````
 
 ---
 
 ## Project Structure
 
 ```
-
 property-listing-backend/
 ├── config/
 │   └── db.ts
@@ -71,39 +65,38 @@ property-listing-backend/
 ├── tsconfig.json
 ├── vercel.json
 └── README.md
-
-````
+```
 
 ---
 
 ## Prerequisites
 
-- Node.js v18.x
-- MongoDB Atlas (or local MongoDB)
-- Redis Cloud
-- Git
-- Vercel Account + CLI
+* Node.js v18.x
+* MongoDB Atlas or local MongoDB
+* Redis Cloud
+* Git
+* Vercel Account + CLI
 
 ---
 
 ## Setup Instructions
 
-### 1. Clone the Repository
+1. **Clone the Repository**
 
 ```bash
 git clone https://github.com/your-username/property-listing-backend.git
 cd property-listing-backend
-````
+```
 
-### 2. Install Dependencies
+2. **Install Dependencies**
 
 ```bash
 npm install
 ```
 
-### 3. Configure Environment Variables
+3. **Configure Environment Variables**
 
-Create a `.env` file in the root with:
+Create a `.env` file in the root with the following:
 
 ```env
 MONGO_URI=mongodb://your-mongodb-uri
@@ -112,19 +105,18 @@ JWT_SECRET=your_jwt_secret
 PORT=3000
 ```
 
-### 4. Run Locally
+4. **Run Locally**
 
 ```bash
 npm run dev
 ```
 
+---
 
-
-## API Endpoints
+## 📡 API Endpoints
 
 All endpoints are prefixed with `/api`.
-
-> **Authorization**: Use `Bearer <token>` for endpoints requiring authentication.
+**Authorization**: Use `Bearer <token>` for authenticated endpoints.
 
 ---
 
@@ -132,7 +124,7 @@ All endpoints are prefixed with `/api`.
 
 #### `POST /api/auth/register`
 
-Register a new user.
+Registers a new user.
 
 ```json
 {
@@ -142,15 +134,16 @@ Register a new user.
 }
 ```
 
-**Response**:
-`201`: `{ "message": "User registered successfully" }`
-`400`: `{ "error": "Error registering user" }`
+Responses:
+
+* `201`: `{ "message": "User registered successfully" }`
+* `400`: `{ "error": "Error registering user" }`
 
 ---
 
 #### `POST /api/auth/login`
 
-Log in and receive JWT token.
+Logs in and returns JWT.
 
 ```json
 {
@@ -159,17 +152,18 @@ Log in and receive JWT token.
 }
 ```
 
-**Response**:
-`200`: `{ "token": "<JWT>" }`
-`400`: `{ "error": "Invalid credentials" }`
+Responses:
+
+* `200`: `{ "token": "<JWT>" }`
+* `400`: `{ "error": "Invalid credentials" }`
 
 ---
 
 ### Properties
 
-#### `POST /api/properties`
+#### `POST /api/properties` (Auth required)
 
-Create new property listing (Auth required).
+Create a new property listing.
 
 ```json
 {
@@ -191,71 +185,82 @@ Create new property listing (Auth required).
 }
 ```
 
+Responses:
+
+* `201`: Success
+* `400`: Validation errors
+* `401`: Unauthorized
+* `409`: Duplicate property
+* `500`: Server error
+
 ---
 
 #### `GET /api/properties`
 
-List all properties (cached in Redis).
-
-**Response**: Array of property objects.
-`500`: `{ "error": "Error fetching properties" }`
-
----
+List all properties (cached via Redis).
 
 #### `GET /api/properties/search`
 
-Search properties by filters.
+Search with filters. Example:
 
-**Example**: `/api/properties/search?city=New York&minPrice=100000&bedrooms=2&type=Apartment`
+```
+/api/properties/search?city=New York&minPrice=100000&bedrooms=2&type=Apartment
+```
 
-**Query Parameters**:
-
-* `city`, `state`, `country`
-* `minPrice`, `maxPrice`
-* `bedrooms`, `bathrooms`
-* `minArea`, `maxArea`
-* `type`, `status`
+Query Parameters: `city`, `state`, `country`, `minPrice`, `maxPrice`, `bedrooms`, `bathrooms`, `minArea`, `maxArea`, `type`, `status`
 
 ---
 
 #### `GET /api/properties/:id`
 
-Get property by ID (cached in Redis).
+Get a property by ID (cached).
 
 ---
 
 ### Favorites
 
-#### `POST /api/favorites/:propertyId`
+#### `POST /api/favorites` (Auth required)
 
-Save a property to favorites (Auth required).
+Add property to favorites.
+
+```json
+{
+  "propertyId": "507f1f77bcf86cd799439011"
+}
+```
 
 ---
 
-#### `GET /api/favorites`
+#### `GET /api/favorites` (Auth required)
 
-List user's favorite properties (Auth required).
+List all favorites of the user.
 
 ---
 
-#### `DELETE /api/favorites/:propertyId`
+#### `DELETE /api/favorites/:propertyId` (Auth required)
 
-Remove property from favorites (Auth required).
+Remove property from favorites.
 
 ---
 
 ### Recommendations
 
-#### `POST /api/recommend/:propertyId`
+#### `POST /api/recommendations` (Auth required)
 
-Recommend a property via email (Auth required).
+Recommend a property to a friend.
 
 ```json
 {
-  "to": "friend@example.com",
-  "message": "Check this out!"
+  "propertyId": "507f1f77bcf86cd799439011",
+  "recipientEmail": "friend@example.com"
 }
 ```
+
+---
+
+#### `GET /api/recommendations` (Auth required)
+
+List recommendations sent by the user.
 
 ---
 
